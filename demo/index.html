@@ -1,0 +1,43 @@
+<html>
+<head>
+  <link href="css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 20px 100px;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-page">
+    <div class="header">
+      <h1>Tracking codes like a boss</h1>
+    </div>
+    <div class="body">
+      <div>
+        <textarea autofocus="autofocus" class="editor" rows="5" style="width: 400px; font-size: 15px; text-align: left"></textarea>
+      </div>
+      <br />
+      <div>
+        <textarea class="replay btn" disabled="disabled" rows="5" style="width: 400px; font-size: 15px; text-align: left; border: 1px solid black;"></textarea>
+      </div>
+      <br />
+
+      <div>
+        <div>
+          <button class="replay btn" type="submit">Replay Session</button>
+          <button class="clear btn" type="submit">Clear Session</button>
+          <button class="save btn" type="submit">Save Session</button>
+        </div>
+        <br />
+      </div>
+      <div>
+        <button class="print btn" type="submit">Print Session to Console</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/components/jquery/jquery.min.js"></script>
+  <script src="../dist/jquery.recorder.unmin.js"></script>
+  <script src="js/demo.js"></script>
+</body>
+</html>
