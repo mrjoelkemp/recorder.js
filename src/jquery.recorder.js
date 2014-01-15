@@ -31,6 +31,47 @@
     this.deltas = [];
   };
 
+  // Play the recording within the supplied target element
+  $.fn.playRecording = function ($target) {
+    var that = this,
+        nextFrameAt = 0,
+        // All deltas will be applied to this state
+        code = [];
+
+    $target = $target instanceof $ ? $target : $($target);
+
+    $.each(this.deltas, function (idx, delta) {
+      var i = 0, l = delta.subdeltas.length,
+          sd;
+
+      // Stagger the delay to create a sequence
+      nextFrameAt += Number(delta.time);
+
+      // Apply all changes of the current delta
+      for (; i < l; i++) {
+        sd = delta.subdeltas[i][0];
+        console.log(sd)
+        // Remove
+        if (Number(sd[0]) === REMOVE) {
+          code[i] = '';
+
+        // Add
+        } else if (Number(sd[0]) === ADD) {
+          code[sd[2]] = sd[1];
+        }
+      }
+
+      // Insert it into the target at the right time
+      (function (c, t) {
+
+        setTimeout(function () {
+          $target.val(c);
+        }, t);
+
+      })(code.join(''), nextFrameAt);
+    }); // end each
+  };
+
 
   //////////////////
   // Generic Helpers
@@ -101,11 +142,10 @@
       },
 
       // Prepares the generated delta for storage
-      // stripping unwanted info and computing needed fields
+      //    stripping unwanted info and computing needed fields
       // Precond: delta is the (array) result of diff_main
       postProcessDelta = function (delta) {
-        var
-            newDelta = {
+        var newDelta = {
               // relative timestamp
               time: getTimeSinceLastCall(),
               subdeltas: []

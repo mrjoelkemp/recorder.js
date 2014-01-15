@@ -1,7 +1,7 @@
-var $recorder = $('.editor').recorder();
+var $recorder = $('textarea.editor').recorder();
 
 $('button.replay').click(function () {
-  // $recorder.playRecording();
+  $recorder.playRecording($('textarea.player'));
 });
 
 $('button.clear').click(function () {
