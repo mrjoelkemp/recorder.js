@@ -10,13 +10,13 @@
   ////////////////////
 
   $.fn.recorder = function () {
-    var $this = $(this);
-
     this.idleTimerId = 0;
-    this.lastSnapshot = getSnapshot(this);
+    this.lastSnapshot = getSnapshot.call(this);
     this.deltas = [];
 
-    $this.on('keydown change', computeDelta);
+    this.on('keydown change', computeDelta.bind(this));
+
+    return this;
   };
 
   // Retrieve the deltas
@@ -50,11 +50,10 @@
         return timeSinceLast;
       },
 
-      // Precond: target (dom element): the textarea input source
-      getSnapshot = function (target) {
+      getSnapshot = function () {
         // TODO: Support Ace and CodeMirror entities
         // Do they still input text into the hijacked textarea?
-        return target.value;
+        return this.val();
       };
 
 
@@ -69,33 +68,33 @@
       NO_CHANGE = 0,
 
       computeDelta = function () {
-        var currentSnapshot = getSnapshot(),
+        var currentSnapshot = getSnapshot.call(this),
             delta;
 
         // Cancel an existing idle timer
         if (this.idleTimerId) clearTimeout(this.idleTimerId);
 
-        delta = gdiff.diff_main(lastSnapshot, currentSnapshot);
+        delta = gdiff.diff_main(this.lastSnapshot, currentSnapshot);
 
         // If the delta has the string unchanged
-        if (! isTextChange(delta)) return;
+        if (isNotTextChange(delta)) return;
 
         delta = postProcessDelta(delta);
 
-        that.deltas.push(delta);
+        this.deltas.push(delta);
 
-        lastSnapshot = currentSnapshot;
+        this.lastSnapshot = currentSnapshot;
 
         // Trigger the idle timer
         // If the user hasn't typed in within a threshold,
         // fire a change event to make sure we get the
         // last input
-        idleTimerId = setTimeout(function () {
-          $target.trigger('change');
-        }, 190);
+        this.idleTimerId = setTimeout(function () {
+          this.trigger('change');
+        }.bind(this), 190);
       },
 
-      isTextChange = function (delta) {
+      isNotTextChange = function (delta) {
         return ! delta.length ||
             // The keystroke didn't produce a change, then do nothing
             (delta.length === 1 && delta[0][0] === NO_CHANGE)
