@@ -2200,6 +2200,28 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
   var gdiff = new window.diff_match_patch();
 
   ////////////////////
+  // Delta
+  ////////////////////
+
+  function Delta (options) {
+    options = options || {};
+
+    this.value      = options.value     || 0;
+    this.operation  = options.operation || Delta.NO_CHANGE;
+    this.time       = options.time      || 0;
+    this.subdeltas  = options.subdeltas || [];
+  };
+
+  // Operation constants
+  Delta.prototype.ADD       = 1;
+  Delta.prototype.REMOVE    = -1;
+  Delta.prototype.NO_CHANGE = 0;
+
+  Delta.prototype.toString = function () {
+    // TODO: return compact representation
+  };
+
+  ////////////////////
   // Public Methods
   ////////////////////
 
@@ -2246,11 +2268,11 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
         sd = delta.subdeltas[i][0];
         console.log(sd)
         // Remove
-        if (Number(sd[0]) === REMOVE) {
+        if (Number(sd[0]) === Delta.prototype.REMOVE) {
           code[i] = '';
 
         // Add
-        } else if (Number(sd[0]) === ADD) {
+        } else if (Number(sd[0]) === Delta.prototype.ADD) {
           code[sd[2]] = sd[1];
         }
       }
@@ -2297,11 +2319,6 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
   //////////////////
 
   var
-      // Google Diff Operation Constants
-      ADD       = 1,
-      REMOVE    = -1,
-      NO_CHANGE = 0,
-
       computeDelta = function () {
         var currentSnapshot = getSnapshot.call(this),
             delta;
@@ -2332,7 +2349,7 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
       isNotTextChange = function (delta) {
         return ! delta.length ||
             // The keystroke didn't produce a change, then do nothing
-            (delta.length === 1 && delta[0][0] === NO_CHANGE)
+            (delta.length === 1 && delta[0][0] === Delta.prototype.NO_CHANGE)
       },
 
       // Prepares the generated delta for storage
@@ -2355,7 +2372,7 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
           value     = subdelta[1];
 
           // Set the position for the modification
-          if (operation === NO_CHANGE) {
+          if (operation === Delta.prototype.NO_CHANGE) {
             // Jump past the unchanged portion
             nextPos += value.length;
           } else {
