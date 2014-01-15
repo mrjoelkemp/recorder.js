@@ -1,0 +1,15 @@
+{
+  "name": "jquery.recorder",
+  "version": "0.0.0",
+  "description": "Text recorder for textareas",
+  "main": "jquery.recorder.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Joel Kemp <joel@mrjoelkemp.com>",
+  "dependencies": {
+    "domify": "~1.1.1"
+  },
+  "license": "MIT"
+}
