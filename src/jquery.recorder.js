@@ -219,33 +219,26 @@
 
   // Play the recording within the supplied target element
   $.fn.playRecording = function ($target) {
-    var that = this,
-        nextFrameAt = 0,
+    var nextFrameAt = 0,
         // All deltas will be applied to this state
         code = [];
 
     $target = $target instanceof $ ? $target : $($target);
 
-    $.each(this.deltas, function (idx, delta) {
-      var i = 0, l = delta.subdeltas.length,
-          sd;
-
+    this.deltas.forEach(function (delta) {
       // Stagger the delay to create a sequence
       nextFrameAt += Number(delta.time);
 
       // Apply all changes of the current delta
-      for (; i < l; i++) {
-        sd = delta.subdeltas[i][0];
-        console.log(sd)
-        // Remove
-        if (Number(sd[0]) === Delta.prototype.REMOVE) {
+      delta.diffs.forEach(function (diff) {
+
+        if (diff.operation === diff.REMOVE) {
           code[i] = '';
 
-        // Add
-        } else if (Number(sd[0]) === Delta.prototype.ADD) {
-          code[sd[2]] = sd[1];
+        } else if (diff.operation === diff.ADD) {
+          code[diff.location] = diff.value;
         }
-      }
+      });
 
       // Insert it into the target at the right time
       (function (c, t) {
@@ -255,7 +248,7 @@
         }, t);
 
       })(code.join(''), nextFrameAt);
-    }); // end each
+    });
   };
 
 
