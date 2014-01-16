@@ -2,7 +2,7 @@ build: browserify uglify
 
 browserify:
 	@echo browserifying
-	@browserify -s recorder ./src/recorder.js > ./dist/recorder.js
+	@browserify -s Recorder ./src/recorder.js > ./dist/recorder.js
 
 uglify:
 	@echo uglifying
