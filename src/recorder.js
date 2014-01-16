@@ -10,13 +10,11 @@ var Recorder = module.exports = function (target) {
   this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  var cb = function () {
-    console.log('cb called with args, ', arguments)
+  var cb = function (e) {
     onInput.call(this, target);
   }.bind(this);
 
-  target.onchange   = cb;
-  target.onkeydown  = cb;
+  target.addEventListener('keyup', cb);
 
   return this;
 };
@@ -43,18 +41,6 @@ var onInput = function (target) {
   this.deltas.push(delta);
 
   this.lastSnapshot = currentSnapshot;
-
-  if (this.changeWasManuallyTriggered) return;
-
-  // Trigger the idle timer
-  // If the user hasn't typed in within a threshold,
-  // fire a change event to make sure we get the
-  // last input
-  this.idleTimerId = setTimeout(function () {
-    target.onchange();
-    this.changeWasManuallyTriggered = true;
-  }.bind(this), 190);
-
 };
 
 // Retrieve the deltas
@@ -85,7 +71,7 @@ Recorder.prototype.play = function (target) {
     delta.diffs.forEach(function (diff) {
 
       if (diff.operation === diff.REMOVE) {
-        code[i] = '';
+        code[diff.location] = '';
 
       } else if (diff.operation === diff.ADD) {
         code[diff.location] = diff.value;
