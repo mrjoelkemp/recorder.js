@@ -13,23 +13,36 @@
     <![endif]-->
   </head>
   <body>
+    <a href="https://github.com/mrjoelkemp/recorder.js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
     <div class="wrapper">
       <header>
         <h1>Recorder.js</h1>
         <p>Text recorder for textareas</p>
 
-        <p class="view"><a href="https://github.com/mrjoelkemp/recorder.js">View the Project on GitHub <small>mrjoelkemp/recorder.js</small></a></p>
+        <span>Try out recorder.js here:</span>
+        <textarea autofocus class="editor" placeholder="Start typing then hit play" rows="5" style="width: 300px; font-size: 15px; text-align: left"></textarea>
+
+        <br />
+        <button class="replay btn" type="submit">Play Recording</button>
+
+        <br />
+        <br />
+
+        <span>See the replay here:</span>
+        <br />
+        <textarea class="player" disabled="disabled" rows="5" style="width: 300px; font-size: 15px; text-align: left; border: 1px solid black;"></textarea>
 
 
-        <ul>
-          <li><a href="https://github.com/mrjoelkemp/recorder.js/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/mrjoelkemp/recorder.js/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/mrjoelkemp/recorder.js">View On <strong>GitHub</strong></a></li>
-        </ul>
+        <br />
+        <button class="clear btn" type="submit">Clear Recording</button>
+        <button class="print btn" type="submit">Print Deltas to Console</button>
+
+        <br />
+        <br />
       </header>
       <section>
         <h1>
-<a name="recorderjs" class="anchor" href="#recorderjs"><span class="octicon octicon-link"></span></a>recorder.js</h1>
 
 <p>A textual recorder for textareas</p>
 
@@ -67,6 +80,8 @@
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
-    
+    <script src="dist/recorder.min.js"></script>
+    <script src="demo/js/demo.js"></script>
+
   </body>
 </html>
