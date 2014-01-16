@@ -1,9 +1,21 @@
 <html>
 <head>
-  <link href="css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
       margin: 20px 100px;
+    }
+
+    .editor {
+      width: 400px;
+      font-size: 15px;
+      text-align: left;
+    }
+
+    .player {
+      width: 400px;
+      font-size: 15px;
+      text-align: left;
+      border: 1px solid black;
     }
   </style>
 </head>
@@ -14,29 +26,28 @@
     </div>
     <div class="body">
       <div>
-        <textarea autofocus="autofocus" class="editor" rows="5" style="width: 400px; font-size: 15px; text-align: left"></textarea>
+        <textarea autofocus class="editor" rows="5"></textarea>
       </div>
       <br />
       <div>
-        <textarea class="player" disabled="disabled" rows="5" style="width: 400px; font-size: 15px; text-align: left; border: 1px solid black;"></textarea>
+        <textarea class="player" disabled="disabled" rows="5"></textarea>
       </div>
       <br />
 
       <div>
         <div>
-          <button class="replay btn" type="submit">Play Recording</button>
-          <button class="clear btn" type="submit">Clear Recording</button>
+          <button class="replay" type="submit">Play Recording</button>
+          <button class="clear" type="submit">Clear Recording</button>
         </div>
         <br />
       </div>
       <div>
-        <button class="print btn" type="submit">Print Recording Deltas to Console</button>
+        <button class="print" type="submit">Print Recording Deltas to Console</button>
       </div>
     </div>
   </div>
 
-  <script src="js/components/jquery/jquery.min.js"></script>
-  <script src="../dist/jquery.recorder.unmin.js"></script>
+  <script src="../dist/recorder.min.js"></script>
   <script src="js/demo.js"></script>
 </body>
 </html>
