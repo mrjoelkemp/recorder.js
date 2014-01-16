@@ -11,21 +11,19 @@
   "dependencies": {},
   "license": "MIT",
   "devDependencies": {
-    "gulp-util": "~2.2.10",
-    "gulp": "~3.3.4",
-    "gulp-uglify": "~0.1.0",
-    "gulp-concat": "~2.1.7",
-    "gulp-watch": "~0.4.2",
     "browserify": "~3.20.0",
-    "browserify-shim": "~3.1.5"
+    "browserify-shim": "~3.1.5",
+    "uglify-js": "~2.4.9"
   },
   "browserify": {
-    "transform": [ "browserify-shim" ]
+    "transform": [
+      "browserify-shim"
+    ]
   },
   "browser": {
     "diff_match_patch": "./vendor/diff_patch/diff_match_patch_uncompressed.js"
   },
   "browserify-shim": {
     "diff_match_patch": "diff_match_patch"
-  },
+  }
 }

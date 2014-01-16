@@ -1,4 +1,4 @@
-var Diff = require('diff');
+var Diff = require('./diff');
 
 var GoogleDiff = module.exports = function (googleDiff) {
   // Borrow constructor

@@ -1,3 +1,279 @@
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// A delta is the collection of diffs that represent a transition
+var diff_match_patch = require('diff_match_patch');
+
+// between one textual state and another
+// Supported options:
+//    diffs : a list of diff objects, if you want to manually override
+//    time  : the timestamp for this textual change
+var Delta = module.exports = function (options) {
+  options = options || {};
+
+  this.diffs  = options.diffs || [];
+  this.time   = options.time  || null;
+};
+
+// Shared instance of the diff engine
+Delta.prototype.diffEngine = new diff_match_patch();
+
+// Returns a string representation of the diffs
+Delta.prototype.toString = function () {
+  var result = '';
+
+  this.diffs.each(function (diff) {
+    result += diff.toString();
+  });
+
+  return result;
+};
+
+// A delta is non-empty if there is at least one diff representing a change
+Delta.prototype.isNoChange = function () {
+  var isEmpty = true;
+
+  this.diffs.forEach(function (diff) {
+    if (diff && ! diff.isNoChange()) {
+      isEmpty = false;
+    }
+  });
+
+  return isEmpty;
+};
+
+// Populates the current delta with the diff from the passed options
+// Handles multi-character deletion and insertion
+// Supported options:
+//    previousValue
+//    currentValue
+Delta.prototype.computeDiffs = function (options) {
+  options = options || {
+    previousValue : '',
+    currentValue  : ''
+  };
+
+  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue),
+      diff;
+
+  if (! googleDiff.length) return;
+
+  this.diffs = this.diffs.concat(getDiffs(googleDiff));
+};
+
+// Private Methods
+
+var
+    getDiffs = function (googleDiff) {
+      var diffs = [],
+          nextPos = 0;
+
+      googleDiff.forEach(function (gdiff) {
+        var diff = new GoogleDiff(gdiff),
+            unrolled;
+
+        // Set the position for the modification
+        if (diff.isNoChange()) {
+          // Jump past the unchanged portion
+          nextPos += diff.value.length;
+
+        } else {
+          // In case the value is multicharacter
+          unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
+          // Extend the list of subdeltas with the unrolled ones
+          diffs = diffs.concat(unrolled);
+
+          nextPos++;
+        }
+      });
+
+      return diffs;
+    },
+
+    // Generate a list of deltas from a multicharacter
+    // string based on the passed delta parameters
+    unrollDeltas = function (value, operation, startingPos) {
+      var deltas = [],
+          i, l;
+
+      for (i = 0, l = value.length; i < l; i++) {
+        deltas.push(new Diff({
+          operation   : operation,
+          value       : value[i],
+          location    : startingPos
+        }));
+
+        startingPos++;
+      }
+
+      return deltas;
+    };
+},{"diff_match_patch":5}],2:[function(require,module,exports){
+// A diff represents a single operation/transformation within a delta
+var Diff = module.exports = function (options) {
+  this.value      = options.value     || null;
+  this.operation  = options.operation || this.NO_CHANGE;
+  this.location   = options.location  || 0;
+};
+
+// Operation constants
+Diff.prototype.ADD       = 1;
+Diff.prototype.REMOVE    = -1;
+Diff.prototype.NO_CHANGE = 0;
+
+// Whether or not the current diff represents a textual change
+Diff.prototype.isNoChange = function () {
+  var isEmptyDiff = typeof this.operation === 'undefined' && typeof this.value === 'undefined',
+      hasNoChange = this.operation === this.NO_CHANGE;
+
+  return isEmptyDiff || hasNoChange;
+};
+
+Diff.prototype.toString = function () {
+  // TODO: Compact representation of this diff
+  return '';
+};
+},{}],3:[function(require,module,exports){
+var Diff = require('./diff');
+
+var GoogleDiff = module.exports = function (googleDiff) {
+  // Borrow constructor
+  Diff.call(this, {
+    operation  : googleDiff[0],
+    value      : googleDiff[1],
+    location   : googleDiff[2] || 0
+  });
+}
+
+GoogleDiff.prototype = Diff.prototype;
+},{"./diff":2}],4:[function(require,module,exports){
+var Diff = require('./diff'),
+    GoogleDiff = require('./googlediff'),
+    Delta = require('./delta');
+
+var Recorder = module.exports = function (target) {
+  // Used to capture the final keypress once idle
+  this.idleTimerId = 0;
+  // Used to compute the delay between deltas
+  this.lastTime = 0;
+  this.lastSnapshot = getSnapshot.call(this);
+  this.deltas = [];
+
+  target.addEventListener('keydown change', function () {
+    onInput.call(this, target);
+  }.bind(this));
+
+  return this;
+};
+
+var onInput = function (target) {
+  var currentSnapshot = getSnapshot(target),
+      delta;
+
+  // Cancel an existing idle timer
+  if (this.idleTimerId) clearTimeout(this.idleTimerId);
+
+  delta = new Delta({
+    time: getTimeSinceLastCall.call(this)
+  });
+
+  delta.computeDiffs({
+    previousValue:  this.lastSnapshot,
+    currentValue:   currentSnapshot
+  });
+
+  // If the delta has the string unchanged
+  if (delta.isNoChange()) return;
+
+  this.deltas.push(delta);
+
+  this.lastSnapshot = currentSnapshot;
+
+  if (this.changeWasManuallyTriggered) return;
+
+  // Trigger the idle timer
+  // If the user hasn't typed in within a threshold,
+  // fire a change event to make sure we get the
+  // last input
+  this.idleTimerId = setTimeout(function () {
+    target.onChange();
+    this.changeWasManuallyTriggered = true;
+  }.bind(this), 190);
+
+};
+
+// Retrieve the deltas
+Recorder.prototype.getRecording = function () {
+  return {
+    deltas: this.deltas
+  };
+};
+
+// Deletes all of the deltas
+Recorder.prototype.clear = function () {
+  this.deltas = [];
+  this.lastTime = 0;
+  this.lastSnapshot = '';
+};
+
+  // Play the recording within the supplied target element
+Recorder.prototype.play = function (target) {
+  var nextFrameAt = 0,
+      // All deltas will be applied to this state
+      code = [];
+
+  this.deltas.forEach(function (delta) {
+    // Stagger the delay to create a sequence
+    nextFrameAt += Number(delta.time);
+
+    // Apply all changes of the current delta
+    delta.diffs.forEach(function (diff) {
+
+      if (diff.operation === diff.REMOVE) {
+        code[i] = '';
+
+      } else if (diff.operation === diff.ADD) {
+        code[diff.location] = diff.value;
+      }
+    });
+
+    // Insert it into the target at the right time
+    (function (c, t) {
+
+      setTimeout(function () {
+        // TODO: Support setting CodeMirror or Ace targets
+        target.value = c;
+      }, t);
+
+    })(code.join(''), nextFrameAt);
+  });
+};
+
+
+//////////////////
+// Generic Helpers
+//////////////////
+
+var
+    // Returns the time since the previous call of this function
+    // TODO: Find a better way to keep relative time without
+    //    putting too much responsibility on the diff
+    //    but also doesn't conflict with multiple recorders
+    getTimeSinceLastCall = function () {
+      var now = new Date().getTime(),
+          // Time delay since last snapshot
+          timeSinceLast = this.lastTime ? now - this.lastTime : 0;
+
+      this.lastTime = now;
+
+      return timeSinceLast;
+    },
+
+    getSnapshot = function (target) {
+      // TODO: Support Ace and CodeMirror entities
+      // Do they still input text into the hijacked textarea?
+      return target.value;
+    };
+},{"./delta":1,"./diff":2,"./googlediff":3}],5:[function(require,module,exports){
+var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
 /**
  * Diff Match and Patch
  *
@@ -2192,283 +2468,10 @@ this['DIFF_DELETE'] = DIFF_DELETE;
 this['DIFF_INSERT'] = DIFF_INSERT;
 this['DIFF_EQUAL'] = DIFF_EQUAL;
 
-;(function($) {
-  'use strict';
+; browserify_shim__define__module__export__(typeof diff_match_patch != "undefined" ? diff_match_patch : window.diff_match_patch);
 
-  ////////////////////
-  // Diff
-  ////////////////////
+}).call(global, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
 
-  // A diff represents a single operation/transformation within a delta
-  function Diff (options) {
-    this.value      = options.value     || null;
-    this.operation  = options.operation || this.NO_CHANGE;
-    this.location   = options.location  || 0;
-  }
-
-  // Operation constants
-  Diff.prototype.ADD       = 1;
-  Diff.prototype.REMOVE    = -1;
-  Diff.prototype.NO_CHANGE = 0;
-
-  // Whether or not the current diff represents a textual change
-  Diff.prototype.isNoChange = function () {
-    var isEmptyDiff = typeof this.operation === 'undefined' && typeof this.value === 'undefined',
-        hasNoChange = this.operation === this.NO_CHANGE;
-
-    return isEmptyDiff || hasNoChange;
-  };
-
-  Diff.prototype.toString = function () {
-    // TODO: Compact representation of this diff
-    return '';
-  };
-
-  function GoogleDiff (googleDiff) {
-    // Borrow constructor
-    Diff.call(this, {
-      operation  : googleDiff[0],
-      value      : googleDiff[1],
-      location   : googleDiff[2] || 0
-    });
-  }
-
-  GoogleDiff.prototype = Diff.prototype;
-
-
-  ////////////////////
-  // Delta
-  ////////////////////
-
-  // A delta is the collection of diffs that represent a transition
-  // between one textual state and another
-  // Supported options:
-  //    diffs : a list of diff objects, if you want to manually override
-  //    time  : the timestamp for this textual change
-  function Delta (options) {
-    options = options || {};
-
-    this.diffs  = options.diffs || [];
-    this.time   = options.time  || null;
-  };
-
-  // Shared instance of the google diff engine
-  Delta.prototype.gdiff = window.diff_match_patch ? new window.diff_match_patch() : null;
-
-  // Returns a string representation of the diffs
-  Delta.prototype.toString = function () {
-    var result = '';
-
-    this.diffs.each(function (diff) {
-      result += diff.toString();
-    });
-
-    return result;
-  };
-
-  // A delta is non-empty if there is at least one diff representing a change
-  Delta.prototype.isNoChange = function () {
-    var isEmpty = true;
-
-    this.diffs.forEach(function (diff) {
-      if (diff && ! diff.isNoChange()) {
-        isEmpty = false;
-      }
-    });
-
-    return isEmpty;
-  };
-
-  // Populates the current delta with the diff from the passed options
-  // Handles multi-character deletion and insertion
-  // Supported options:
-  //    previousValue
-  //    currentValue
-  Delta.prototype.computeDiffs = function (options) {
-    if (! this.gdiff) throw new Error('google diff engine not found');
-
-    options = options || {
-      previousValue : '',
-      currentValue  : ''
-    };
-
-    var googleDiff = this.gdiff.diff_main(options.previousValue, options.currentValue),
-        diff;
-
-    if (! googleDiff.length) return;
-
-    this.diffs = this.diffs.concat(getDiffs(googleDiff));
-  };
-
-  var
-      getDiffs = function (googleDiff) {
-        var diffs = [],
-            nextPos = 0;
-
-        googleDiff.forEach(function (gdiff) {
-          var diff = new GoogleDiff(gdiff),
-              unrolled;
-
-          // Set the position for the modification
-          if (diff.isNoChange()) {
-            // Jump past the unchanged portion
-            nextPos += diff.value.length;
-
-          } else {
-            // In case the value is multicharacter
-            unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
-            // Extend the list of subdeltas with the unrolled ones
-            diffs = diffs.concat(unrolled);
-
-            nextPos++;
-          }
-        });
-
-        return diffs;
-      },
-
-      // Generate a list of deltas from a multicharacter
-      // string based on the passed delta parameters
-      unrollDeltas = function (value, operation, startingPos) {
-        var deltas = [],
-            i, l;
-
-        for (i = 0, l = value.length; i < l; i++) {
-          deltas.push(new Diff({
-            operation   : operation,
-            value       : value[i],
-            location    : startingPos
-          }));
-
-          startingPos++;
-        }
-
-        return deltas;
-      };
-
-  ////////////////////
-  // Public Methods
-  ////////////////////
-
-  $.fn.recorder = function () {
-    // Used to capture the final keypress once idle
-    this.idleTimerId = 0;
-    // Used to compute the delay between deltas
-    this.lastTime = 0;
-    this.lastSnapshot = getSnapshot.call(this);
-    this.deltas = [];
-
-    this.on('keydown change', function () {
-      var currentSnapshot = getSnapshot.call(this),
-          delta;
-
-      // Cancel an existing idle timer
-      if (this.idleTimerId) clearTimeout(this.idleTimerId);
-
-      delta = new Delta({
-        time: getTimeSinceLastCall.call(this)
-      });
-
-      delta.computeDiffs({
-        previousValue:  this.lastSnapshot,
-        currentValue:   currentSnapshot
-      });
-
-      // If the delta has the string unchanged
-      if (delta.isNoChange()) return;
-
-      this.deltas.push(delta);
-
-      this.lastSnapshot = currentSnapshot;
-
-      if (this.changeWasManuallyTriggered) return;
-
-      // Trigger the idle timer
-      // If the user hasn't typed in within a threshold,
-      // fire a change event to make sure we get the
-      // last input
-      this.idleTimerId = setTimeout(function () {
-        this.trigger('change');
-        this.changeWasManuallyTriggered = true;
-      }.bind(this), 190);
-
-    }.bind(this));
-
-    return this;
-  };
-
-  // Retrieve the deltas
-  $.fn.getRecording = function () {
-    return {
-      deltas: this.deltas
-    };
-  };
-
-  // Deletes all of the deltas
-  $.fn.clearRecording = function () {
-    this.deltas = [];
-    this.lastTime = 0;
-    this.lastSnapshot = '';
-  };
-
-  // Play the recording within the supplied target element
-  $.fn.playRecording = function ($target) {
-    var nextFrameAt = 0,
-        // All deltas will be applied to this state
-        code = [];
-
-    $target = $target instanceof $ ? $target : $($target);
-
-    this.deltas.forEach(function (delta) {
-      // Stagger the delay to create a sequence
-      nextFrameAt += Number(delta.time);
-
-      // Apply all changes of the current delta
-      delta.diffs.forEach(function (diff) {
-
-        if (diff.operation === diff.REMOVE) {
-          code[i] = '';
-
-        } else if (diff.operation === diff.ADD) {
-          code[diff.location] = diff.value;
-        }
-      });
-
-      // Insert it into the target at the right time
-      (function (c, t) {
-
-        setTimeout(function () {
-          $target.val(c);
-        }, t);
-
-      })(code.join(''), nextFrameAt);
-    });
-  };
-
-
-  //////////////////
-  // Generic Helpers
-  //////////////////
-
-  var
-      // Returns the time since the previous call of this function
-      // TODO: Find a better way to keep relative time without
-      //    putting too much responsibility on the diff
-      //    but also doesn't conflict with multiple recorders
-      getTimeSinceLastCall = function () {
-        var now = new Date().getTime(),
-            // Time delay since last snapshot
-            timeSinceLast = this.lastTime ? now - this.lastTime : 0;
-
-        this.lastTime = now;
-
-        return timeSinceLast;
-      },
-
-      getSnapshot = function () {
-        // TODO: Support Ace and CodeMirror entities
-        // Do they still input text into the hijacked textarea?
-        return this.val();
-      };
-
-})(window.$);
+},{}]},{},[4])
+(4)
+});

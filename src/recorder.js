@@ -1,6 +1,6 @@
-var Diff = require('diff'),
-    GoogleDiff = require('googlediff'),
-    Delta = require('delta');
+var Diff = require('./diff'),
+    GoogleDiff = require('./googlediff'),
+    Delta = require('./delta');
 
 var Recorder = module.exports = function (target) {
   // Used to capture the final keypress once idle
