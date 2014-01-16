@@ -1,16 +1,18 @@
-var $recorder = $('textarea.editor').recorder(),
-    $player   = $('textarea.player');
+var Recorder  = require('recorder'),
+    editor    = document.querySelector('.editor'),
+    player    = document.querySelector('.player'),
+    recorder  = new Recorder(editor);
 
-$('button.replay').click(function () {
-  $recorder.playRecording($player);
+document.querySelector('button.replay').addEventListener('click', function () {
+  recorder.play(player);
 });
 
-$('button.clear').click(function () {
-  $recorder.clearRecording();
-  $recorder.val(' ');
-  $player.val(' ');
+document.querySelector('button.clear').addEventListener('click',function () {
+  recorder.clear();
+  editor.value = '';
+  player.value = '';
 });
 
-$('button.print').click(function () {
-  console.log($recorder.getRecording());
+document.querySelector('button.print').addEventListener('click', function () {
+  console.log(recorder.getRecording());
 });
