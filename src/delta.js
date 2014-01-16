@@ -1,4 +1,6 @@
 // A delta is the collection of diffs that represent a transition
+var diff_match_patch = require('diff_match_patch');
+
 // between one textual state and another
 // Supported options:
 //    diffs : a list of diff objects, if you want to manually override
@@ -10,8 +12,8 @@ var Delta = module.exports = function (options) {
   this.time   = options.time  || null;
 };
 
-// Shared instance of the google diff engine
-Delta.prototype.gdiff = window.diff_match_patch ? new window.diff_match_patch() : null;
+// Shared instance of the diff engine
+Delta.prototype.diffEngine = new diff_match_patch();
 
 // Returns a string representation of the diffs
 Delta.prototype.toString = function () {
@@ -43,14 +45,12 @@ Delta.prototype.isNoChange = function () {
 //    previousValue
 //    currentValue
 Delta.prototype.computeDiffs = function (options) {
-  if (! this.gdiff) throw new Error('google diff engine not found');
-
   options = options || {
     previousValue : '',
     currentValue  : ''
   };
 
-  var googleDiff = this.gdiff.diff_main(options.previousValue, options.currentValue),
+  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue),
       diff;
 
   if (! googleDiff.length) return;

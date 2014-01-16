@@ -1,12 +1,12 @@
 {
-  "name": "jquery.recorder",
+  "name": "recorder.js",
   "version": "0.0.0",
   "description": "Text recorder for textareas",
-  "main": "jquery.recorder.js",
+  "main": "src/recorder.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "",
+  "repository": "https://github.com/mrjoelkemp/recorder.js",
   "author": "Joel Kemp <joel@mrjoelkemp.com>",
   "dependencies": {},
   "license": "MIT",
@@ -15,6 +15,17 @@
     "gulp": "~3.3.4",
     "gulp-uglify": "~0.1.0",
     "gulp-concat": "~2.1.7",
-    "gulp-watch": "~0.4.2"
-  }
+    "gulp-watch": "~0.4.2",
+    "browserify": "~3.20.0",
+    "browserify-shim": "~3.1.5"
+  },
+  "browserify": {
+    "transform": [ "browserify-shim" ]
+  },
+  "browser": {
+    "diff_match_patch": "./vendor/diff_patch/diff_match_patch_uncompressed.js"
+  },
+  "browserify-shim": {
+    "diff_match_patch": "diff_match_patch"
+  },
 }
