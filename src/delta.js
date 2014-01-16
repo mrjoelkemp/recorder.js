@@ -1,5 +1,7 @@
 // A delta is the collection of diffs that represent a transition
-var diff_match_patch = require('diff_match_patch');
+var diff_match_patch = require('diff_match_patch'),
+    GoogleDiff = require('./googlediff'),
+    Diff = require('./diff');
 
 // between one textual state and another
 // Supported options:
