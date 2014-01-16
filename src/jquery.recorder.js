@@ -8,8 +8,7 @@
   // A diff represents a single operation/transformation within a delta
   function Diff (options) {
     this.value      = options.value     || null;
-    this.operation  = options.operation || Diff.NO_CHANGE;
-    this.time       = options.time      || null;
+    this.operation  = options.operation || this.NO_CHANGE;
     this.location   = options.location  || 0;
   }
 
@@ -49,8 +48,14 @@
 
   // A delta is the collection of diffs that represent a transition
   // between one textual state and another
-  function Delta () {
-    this.diffs = [];
+  // Supported options:
+  //    diffs : a list of diff objects, if you want to manually override
+  //    time  : the timestamp for this textual change
+  function Delta (options) {
+    options = options || {};
+
+    this.diffs  = options.diffs || [];
+    this.time   = options.time  || null;
   };
 
   // Shared instance of the google diff engine
@@ -85,14 +90,12 @@
   // Supported options:
   //    previousValue
   //    currentValue
-  //    time
   Delta.prototype.computeDiffs = function (options) {
     if (! this.gdiff) throw new Error('google diff engine not found');
 
     options = options || {
       previousValue : '',
-      currentValue  : '',
-      time          : new Date().getTime()
+      currentValue  : ''
     };
 
     var googleDiff = this.gdiff.diff_main(options.previousValue, options.currentValue),
@@ -118,13 +121,12 @@
             nextPos += diff.value.length;
 
           } else {
-            diff.location = nextPos;
-            nextPos++;
-
             // In case the value is multicharacter
             unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
             // Extend the list of subdeltas with the unrolled ones
             diffs = diffs.concat(unrolled);
+
+            nextPos++;
           }
         });
 
@@ -169,12 +171,13 @@
       // Cancel an existing idle timer
       if (this.idleTimerId) clearTimeout(this.idleTimerId);
 
-      delta = new Delta();
+      delta = new Delta({
+        time: getTimeSinceLastCall.call(this)
+      });
 
       delta.computeDiffs({
         previousValue:  this.lastSnapshot,
-        currentValue:   currentSnapshot,
-        time:           getTimeSinceLastCall.call(this)
+        currentValue:   currentSnapshot
       });
 
       // If the delta has the string unchanged
@@ -184,12 +187,15 @@
 
       this.lastSnapshot = currentSnapshot;
 
+      if (this.changeWasManuallyTriggered) return;
+
       // Trigger the idle timer
       // If the user hasn't typed in within a threshold,
       // fire a change event to make sure we get the
       // last input
       this.idleTimerId = setTimeout(function () {
         this.trigger('change');
+        this.changeWasManuallyTriggered = true;
       }.bind(this), 190);
 
     }.bind(this));
@@ -259,6 +265,9 @@
 
   var
       // Returns the time since the previous call of this function
+      // TODO: Find a better way to keep relative time without
+      //    putting too much responsibility on the diff
+      //    but also doesn't conflict with multiple recorders
       getTimeSinceLastCall = function () {
         var now = new Date().getTime(),
             // Time delay since last snapshot
