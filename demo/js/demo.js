@@ -1,4 +1,5 @@
-var Recorder  = require('recorder'),
+// var Recorder  = require('recorder'),
+var Recorder  = window.Recorder,
     editor    = document.querySelector('.editor'),
     player    = document.querySelector('.player'),
     recorder  = new Recorder(editor);
