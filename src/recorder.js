@@ -11,12 +11,12 @@ var Recorder = module.exports = function (target) {
   this.deltas = [];
 
   var cb = function () {
-    console.log('cb called')
+    console.log('cb called with args, ', arguments)
     onInput.call(this, target);
   }.bind(this);
 
-  target.addEventListener('keydown', cb);
-  target.addEventListener('change', cb);
+  target.onchange   = cb;
+  target.onkeydown  = cb;
 
   return this;
 };
@@ -51,7 +51,7 @@ var onInput = function (target) {
   // fire a change event to make sure we get the
   // last input
   this.idleTimerId = setTimeout(function () {
-    target.onChange();
+    target.onchange();
     this.changeWasManuallyTriggered = true;
   }.bind(this), 190);
 

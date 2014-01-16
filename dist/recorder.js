@@ -1,6 +1,8 @@
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // A delta is the collection of diffs that represent a transition
-var diff_match_patch = require('diff_match_patch');
+var diff_match_patch = require('diff_match_patch'),
+    GoogleDiff = require('./googlediff'),
+    Diff = require('./diff');
 
 // between one textual state and another
 // Supported options:
@@ -106,7 +108,7 @@ var
 
       return deltas;
     };
-},{"diff_match_patch":5}],2:[function(require,module,exports){
+},{"./diff":2,"./googlediff":3,"diff_match_patch":5}],2:[function(require,module,exports){
 // A diff represents a single operation/transformation within a delta
 var Diff = module.exports = function (options) {
   this.value      = options.value     || null;
@@ -154,12 +156,16 @@ var Recorder = module.exports = function (target) {
   this.idleTimerId = 0;
   // Used to compute the delay between deltas
   this.lastTime = 0;
-  this.lastSnapshot = getSnapshot.call(this);
+  this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  target.addEventListener('keydown change', function () {
+  var cb = function () {
+    console.log('cb called with args, ', arguments)
     onInput.call(this, target);
-  }.bind(this));
+  }.bind(this);
+
+  target.onchange   = cb;
+  target.onkeydown  = cb;
 
   return this;
 };
@@ -194,7 +200,7 @@ var onInput = function (target) {
   // fire a change event to make sure we get the
   // last input
   this.idleTimerId = setTimeout(function () {
-    target.onChange();
+    target.onchange();
     this.changeWasManuallyTriggered = true;
   }.bind(this), 190);
 
