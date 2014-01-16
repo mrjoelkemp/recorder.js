@@ -1,11 +1,14 @@
-var $recorder = $('textarea.editor').recorder();
+var $recorder = $('textarea.editor').recorder(),
+    $player   = $('textarea.player');
 
 $('button.replay').click(function () {
-  $recorder.playRecording($('textarea.player'));
+  $recorder.playRecording($player);
 });
 
 $('button.clear').click(function () {
   $recorder.clearRecording();
+  $recorder.val(' ');
+  $player.val(' ');
 });
 
 $('button.print').click(function () {
