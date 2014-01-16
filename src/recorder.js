@@ -7,12 +7,16 @@ var Recorder = module.exports = function (target) {
   this.idleTimerId = 0;
   // Used to compute the delay between deltas
   this.lastTime = 0;
-  this.lastSnapshot = getSnapshot.call(this);
+  this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  target.addEventListener('keydown change', function () {
+  var cb = function () {
+    console.log('cb called')
     onInput.call(this, target);
-  }.bind(this));
+  }.bind(this);
+
+  target.addEventListener('keydown', cb);
+  target.addEventListener('change', cb);
 
   return this;
 };
