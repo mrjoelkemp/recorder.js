@@ -1,29 +1,20 @@
 var Delta = require('./delta');
 
 var Recorder = module.exports = function (target) {
+  this.target = target;
+
   // Used to compute the delay between deltas
   this.lastTime = 0;
-  this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  var cb = function () {
-    onInput.call(this, target);
-  }.bind(this);
-
-  target.addEventListener('keyup', cb);
+  this.lastSnapshot = this._getSnapshot();
 
   return this;
 };
 
-var onInput = function (target) {
-  var currentSnapshot = getSnapshot(target),
-      delta;
-
-  // Cancel an existing idle timer
-  if (this.idleTimerId) clearTimeout(this.idleTimerId);
-
-  delta = new Delta({
-    time: getTimeSinceLastCall.call(this)
+Recorder.prototype._computeDelta = function (currentSnapshot) {
+  var delta = new Delta({
+    time: this._getTimeSinceLastCall()
   });
 
   delta.computeDiffs({
@@ -37,6 +28,26 @@ var onInput = function (target) {
   this.deltas.push(delta);
 
   this.lastSnapshot = currentSnapshot;
+};
+
+// Returns the time since the previous call of this function
+Recorder.prototype._getTimeSinceLastCall = function () {
+  var now = new Date().getTime(),
+      // Time delay since last snapshot
+      timeSinceLast = this.lastTime ? now - this.lastTime : 0;
+
+  this.lastTime = now;
+
+  return timeSinceLast;
+};
+
+// Defaults to textarea value setting
+Recorder.prototype._getSnapshot = function () {
+  return this.target.value;
+};
+
+Recorder.prototype._setSnapshot = function (text) {
+  this.target.value = text;
 };
 
 // Retrieve the deltas
@@ -78,36 +89,9 @@ Recorder.prototype.play = function (target) {
     (function (c, t) {
 
       setTimeout(function () {
-        // TODO: Support setting CodeMirror or Ace targets
-        target.value = c;
+        target.setValue ? target.setValue(c) : (target.value = c);
       }, t);
 
     })(code.join(''), nextFrameAt);
   });
 };
-
-
-//////////////////
-// Generic Helpers
-//////////////////
-
-var
-    // Returns the time since the previous call of this function
-    // TODO: Find a better way to keep relative time without
-    //    putting too much responsibility on the diff
-    //    but also doesn't conflict with multiple recorders
-    getTimeSinceLastCall = function () {
-      var now = new Date().getTime(),
-          // Time delay since last snapshot
-          timeSinceLast = this.lastTime ? now - this.lastTime : 0;
-
-      this.lastTime = now;
-
-      return timeSinceLast;
-    },
-
-    getSnapshot = function (target) {
-      // TODO: Support Ace and CodeMirror entities
-      // Do they still input text into the hijacked textarea?
-      return target.value;
-    };

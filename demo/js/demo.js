@@ -1,8 +1,18 @@
-// var Recorder  = require('recorder'),
-var Recorder  = window.Recorder,
+var
     editor    = document.querySelector('.editor'),
+    CodeMirror = require('../../components/amasad-codemirror/codemirror'),
     player    = document.querySelector('.player'),
-    recorder  = new Recorder(editor);
+    recorder;
+
+require('../../components/benatkin-codemirror-mode-javascript/index')(CodeMirror);
+
+// editor = CodeMirror.fromTextArea(editor);
+// player = CodeMirror.fromTextArea(player);
+editor = new CodeMirror(editor);
+player = new CodeMirror(player);
+
+// recorder = new window.TextAreaRecorder(editor);
+recorder = new window.CodeMirrorRecorder(editor);
 
 document.querySelector('button.replay').addEventListener('click', function () {
   recorder.play(player);
@@ -10,10 +20,11 @@ document.querySelector('button.replay').addEventListener('click', function () {
 
 document.querySelector('button.clear').addEventListener('click',function () {
   recorder.clear();
-  editor.value = '';
-  player.value = '';
+  editor.setValue ? editor.setValue('') : (editor.value = '');
+  player.setValue ? player.setValue('') : (player.value = '');
 });
 
 document.querySelector('button.print').addEventListener('click', function () {
   console.log(recorder.getRecording());
 });
+

@@ -9,6 +9,8 @@
       width: 400px;
       font-size: 15px;
       text-align: left;
+      border: 1px solid black;
+
     }
 
     .player {
@@ -18,6 +20,8 @@
       border: 1px solid black;
     }
   </style>
+  <link href='../components/amasad-codemirror/codemirror.css' rel='stylesheet' type='text/css'>
+
 </head>
 <body>
   <div class="demo-page">
@@ -25,12 +29,14 @@
       <h1>Tracking codes like a boss</h1>
     </div>
     <div class="body">
-      <div>
-        <textarea autofocus class="editor" rows="5"></textarea>
+      <div class="editor">
+      <!-- <div> -->
+        <!-- <textarea autofocus class="editor" rows="5"></textarea> -->
       </div>
       <br />
-      <div>
-        <textarea class="player" disabled="disabled" rows="5"></textarea>
+      <div class="player">
+      <!-- <div> -->
+        <!-- <textarea class="player" disabled="disabled" rows="5"></textarea> -->
       </div>
       <br />
 
@@ -47,7 +53,8 @@
     </div>
   </div>
 
-  <script src="../dist/recorder.js"></script>
-  <script src="js/demo.js"></script>
+  <script src="../dist/codemirrorrecorder.js"></script>
+  <script src="../dist/textarearecorder.js"></script>
+  <script src="js/demo.bundle.js"></script>
 </body>
 </html>
