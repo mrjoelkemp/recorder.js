@@ -1,5 +1,4 @@
-var Recorder  = require('./recorder'),
-    util      = require('util');
+var Recorder  = require('./recorder');
 
 var CodeMirrorRecorder = module.exports = function (codeMirrorTarget) {
   Recorder.call(this, codeMirrorTarget);
@@ -13,7 +12,10 @@ var CodeMirrorRecorder = module.exports = function (codeMirrorTarget) {
   }.bind(this));
 };
 
-util.inherits(CodeMirrorRecorder, Recorder);
+// Create a dummy object in front of the Recorder's prototype
+// so that we can define _getSnapshot on that dummy and avoid
+// the Recorder's definition of _getSnapshot
+CodeMirrorRecorder.prototype = Object.create(Recorder.prototype);
 
 CodeMirrorRecorder.prototype._getSnapshot = function () {
   return this.target.getValue();

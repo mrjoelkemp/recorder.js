@@ -1,8 +1,6 @@
-var Recorder  = require('./recorder'),
-    util      = require('util');
+var Recorder  = require('./recorder');
 
 var TextAreaRecorder = module.exports = function (target) {
-
   Recorder.call(this, target);
 
   target.addEventListener('keyup', function () {
@@ -11,4 +9,4 @@ var TextAreaRecorder = module.exports = function (target) {
   }.bind(this));
 };
 
-util.inherits(TextAreaRecorder, Recorder);
+TextAreaRecorder.prototype = Object.create(Recorder.prototype);
