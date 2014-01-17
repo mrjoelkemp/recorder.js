@@ -1,16 +1,12 @@
-var Diff = require('./diff'),
-    GoogleDiff = require('./googlediff'),
-    Delta = require('./delta');
+var Delta = require('./delta');
 
 var Recorder = module.exports = function (target) {
-  // Used to capture the final keypress once idle
-  this.idleTimerId = 0;
   // Used to compute the delay between deltas
   this.lastTime = 0;
   this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  var cb = function (e) {
+  var cb = function () {
     onInput.call(this, target);
   }.bind(this);
 

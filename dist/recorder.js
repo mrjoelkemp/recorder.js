@@ -147,19 +147,15 @@ var GoogleDiff = module.exports = function (googleDiff) {
 
 GoogleDiff.prototype = Diff.prototype;
 },{"./diff":2}],4:[function(require,module,exports){
-var Diff = require('./diff'),
-    GoogleDiff = require('./googlediff'),
-    Delta = require('./delta');
+var Delta = require('./delta');
 
 var Recorder = module.exports = function (target) {
-  // Used to capture the final keypress once idle
-  this.idleTimerId = 0;
   // Used to compute the delay between deltas
   this.lastTime = 0;
   this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  var cb = function (e) {
+  var cb = function () {
     onInput.call(this, target);
   }.bind(this);
 
@@ -264,7 +260,7 @@ var
       // Do they still input text into the hijacked textarea?
       return target.value;
     };
-},{"./delta":1,"./diff":2,"./googlediff":3}],5:[function(require,module,exports){
+},{"./delta":1}],5:[function(require,module,exports){
 var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
 /**
  * Diff Match and Patch
