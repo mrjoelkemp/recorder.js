@@ -1,4 +1,6 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/*jshint camelcase: false*/
+
 // A delta is the collection of diffs that represent a transition
 var diff_match_patch = require('diff_match_patch'),
     GoogleDiff = require('./googlediff'),
@@ -53,8 +55,7 @@ Delta.prototype.computeDiffs = function (options) {
     currentValue  : ''
   };
 
-  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue),
-      diff;
+  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue);
 
   if (! googleDiff.length) return;
 
@@ -143,7 +144,7 @@ var GoogleDiff = module.exports = function (googleDiff) {
     value      : googleDiff[1],
     location   : googleDiff[2] || 0
   });
-}
+};
 
 GoogleDiff.prototype = Diff.prototype;
 },{"./diff":2}],4:[function(require,module,exports){

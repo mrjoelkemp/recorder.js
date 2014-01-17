@@ -1,3 +1,5 @@
+/*jshint camelcase: false*/
+
 // A delta is the collection of diffs that represent a transition
 var diff_match_patch = require('diff_match_patch'),
     GoogleDiff = require('./googlediff'),
@@ -52,8 +54,7 @@ Delta.prototype.computeDiffs = function (options) {
     currentValue  : ''
   };
 
-  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue),
-      diff;
+  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue);
 
   if (! googleDiff.length) return;
 
