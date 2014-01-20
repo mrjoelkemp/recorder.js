@@ -1,8 +1,6 @@
-// var Recorder  = require('recorder'),
-var Recorder  = window.Recorder,
-    editor    = document.querySelector('.editor'),
+var editor    = document.querySelector('.editor'),
     player    = document.querySelector('.player'),
-    recorder  = new Recorder(editor);
+    recorder  = new window.Recorder.TextAreaRecorder(editor);
 
 document.querySelector('button.replay').addEventListener('click', function () {
   recorder.play(player);

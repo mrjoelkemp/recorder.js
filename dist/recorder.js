@@ -1,4 +1,29 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var Recorder  = require('./recorder');
+
+var CodeMirrorRecorder = module.exports = function (codeMirrorTarget) {
+  Recorder.call(this, codeMirrorTarget);
+
+  // Do codemirror bindings on input
+  codeMirrorTarget.on('change', function () {
+    // Note: codemirror already does the delta computation
+    // but we default to our own engine for now
+    var currentSnapshot = this._getSnapshot();
+    this._computeDelta(currentSnapshot);
+  }.bind(this));
+};
+
+// Create a dummy object in front of the Recorder's prototype
+// so that we can define _getSnapshot on that dummy and avoid
+// the Recorder's definition of _getSnapshot
+CodeMirrorRecorder.prototype = Object.create(Recorder.prototype);
+
+CodeMirrorRecorder.prototype._getSnapshot = function () {
+  return this.target.getValue();
+};
+},{"./recorder":6}],2:[function(require,module,exports){
+/*jshint camelcase: false*/
+
 // A delta is the collection of diffs that represent a transition
 var diff_match_patch = require('diff_match_patch'),
     GoogleDiff = require('./googlediff'),
@@ -53,8 +78,7 @@ Delta.prototype.computeDiffs = function (options) {
     currentValue  : ''
   };
 
-  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue),
-      diff;
+  var googleDiff = this.diffEngine.diff_main(options.previousValue, options.currentValue);
 
   if (! googleDiff.length) return;
 
@@ -108,7 +132,7 @@ var
 
       return deltas;
     };
-},{"./diff":2,"./googlediff":3,"diff_match_patch":5}],2:[function(require,module,exports){
+},{"./diff":3,"./googlediff":4,"diff_match_patch":8}],3:[function(require,module,exports){
 // A diff represents a single operation/transformation within a delta
 var Diff = module.exports = function (options) {
   this.value      = options.value     || null;
@@ -133,7 +157,7 @@ Diff.prototype.toString = function () {
   // TODO: Compact representation of this diff
   return '';
 };
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var Diff = require('./diff');
 
 var GoogleDiff = module.exports = function (googleDiff) {
@@ -143,40 +167,33 @@ var GoogleDiff = module.exports = function (googleDiff) {
     value      : googleDiff[1],
     location   : googleDiff[2] || 0
   });
-}
+};
 
 GoogleDiff.prototype = Diff.prototype;
-},{"./diff":2}],4:[function(require,module,exports){
-var Diff = require('./diff'),
-    GoogleDiff = require('./googlediff'),
-    Delta = require('./delta');
+},{"./diff":3}],5:[function(require,module,exports){
+// Exposes the different types of recorders for instantiation
+module.exports = {
+  CodeMirrorRecorder: require('./codemirrorrecorder'),
+  TextAreaRecorder:   require('./textarearecorder')
+};
+},{"./codemirrorrecorder":1,"./textarearecorder":7}],6:[function(require,module,exports){
+var Delta = require('./delta');
 
 var Recorder = module.exports = function (target) {
-  // Used to capture the final keypress once idle
-  this.idleTimerId = 0;
+  this.target = target;
+
   // Used to compute the delay between deltas
   this.lastTime = 0;
-  this.lastSnapshot = getSnapshot(target);
   this.deltas = [];
 
-  var cb = function (e) {
-    onInput.call(this, target);
-  }.bind(this);
-
-  target.addEventListener('keyup', cb);
+  this.lastSnapshot = this._getSnapshot();
 
   return this;
 };
 
-var onInput = function (target) {
-  var currentSnapshot = getSnapshot(target),
-      delta;
-
-  // Cancel an existing idle timer
-  if (this.idleTimerId) clearTimeout(this.idleTimerId);
-
-  delta = new Delta({
-    time: getTimeSinceLastCall.call(this)
+Recorder.prototype._computeDelta = function (currentSnapshot) {
+  var delta = new Delta({
+    time: this._getTimeSinceLastCall()
   });
 
   delta.computeDiffs({
@@ -190,6 +207,26 @@ var onInput = function (target) {
   this.deltas.push(delta);
 
   this.lastSnapshot = currentSnapshot;
+};
+
+// Returns the time since the previous call of this function
+Recorder.prototype._getTimeSinceLastCall = function () {
+  var now = new Date().getTime(),
+      // Time delay since last snapshot
+      timeSinceLast = this.lastTime ? now - this.lastTime : 0;
+
+  this.lastTime = now;
+
+  return timeSinceLast;
+};
+
+// Defaults to textarea value setting
+Recorder.prototype._getSnapshot = function () {
+  return this.target.value;
+};
+
+Recorder.prototype._setSnapshot = function (text) {
+  this.target.value = text;
 };
 
 // Retrieve the deltas
@@ -231,40 +268,26 @@ Recorder.prototype.play = function (target) {
     (function (c, t) {
 
       setTimeout(function () {
-        // TODO: Support setting CodeMirror or Ace targets
-        target.value = c;
+        target.setValue ? target.setValue(c) : (target.value = c);
       }, t);
 
     })(code.join(''), nextFrameAt);
   });
 };
+},{"./delta":2}],7:[function(require,module,exports){
+var Recorder  = require('./recorder');
 
+var TextAreaRecorder = module.exports = function (target) {
+  Recorder.call(this, target);
 
-//////////////////
-// Generic Helpers
-//////////////////
+  target.addEventListener('keyup', function () {
+    var currentSnapshot = this._getSnapshot();
+    this._computeDelta(currentSnapshot);
+  }.bind(this));
+};
 
-var
-    // Returns the time since the previous call of this function
-    // TODO: Find a better way to keep relative time without
-    //    putting too much responsibility on the diff
-    //    but also doesn't conflict with multiple recorders
-    getTimeSinceLastCall = function () {
-      var now = new Date().getTime(),
-          // Time delay since last snapshot
-          timeSinceLast = this.lastTime ? now - this.lastTime : 0;
-
-      this.lastTime = now;
-
-      return timeSinceLast;
-    },
-
-    getSnapshot = function (target) {
-      // TODO: Support Ace and CodeMirror entities
-      // Do they still input text into the hijacked textarea?
-      return target.value;
-    };
-},{"./delta":1,"./diff":2,"./googlediff":3}],5:[function(require,module,exports){
+TextAreaRecorder.prototype = Object.create(Recorder.prototype);
+},{"./recorder":6}],8:[function(require,module,exports){
 var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
 /**
  * Diff Match and Patch
@@ -2464,6 +2487,6 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
 
 }).call(global, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
 
-},{}]},{},[4])
-(4)
+},{}]},{},[5])
+(5)
 });
