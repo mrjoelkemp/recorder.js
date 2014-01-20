@@ -1,19 +1,31 @@
 recorder.js
 ===
 
-A textual recorder for textareas
+A textual recorder for textareas and text editors
 
 ### Usage
 
 `<script src="dist/recorder.min.js"></script>`
 
+*Note: All recorder types are accessible via `window.Recorder`.*
+
+**Record from a textarea**
 ```javascript
 
-// Set up the recorder to track text changes on an element
-var recorder = new Recorder(HTMLTextAreaElement);
+// Set up the recorder to track text changes
+var recorder = new Recorder.TextAreaRecorder(HTMLTextAreaElement);
 
 // Play the recording back into the supplied element
 recorder.play(HTMLTextAreaElement);
+```
+
+**Record from a [CodeMirror](http://codemirror.net/) editor**
+
+```javascript
+
+// editorInstance = CodeMirror(yourElement);
+
+var recorder = new Recorder.CodeMirrorRecorder(editorInstance);
 ```
 
 **Additional commands**
