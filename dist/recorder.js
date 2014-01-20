@@ -1,4 +1,13 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var CodeMirrorRecorder = require('./codemirrorrecorder');
+
+// Ace's editor has the same event system as CodeMirror
+var AceRecorder = module.exports = function (aceTarget) {
+  CodeMirrorRecorder.call(this, aceTarget);
+};
+
+AceRecorder.prototype = Object.create(CodeMirrorRecorder.prototype);
+},{"./codemirrorrecorder":2}],2:[function(require,module,exports){
 var Recorder  = require('./recorder');
 
 var CodeMirrorRecorder = module.exports = function (codeMirrorTarget) {
@@ -21,7 +30,7 @@ CodeMirrorRecorder.prototype = Object.create(Recorder.prototype);
 CodeMirrorRecorder.prototype._getSnapshot = function () {
   return this.target.getValue();
 };
-},{"./recorder":6}],2:[function(require,module,exports){
+},{"./recorder":7}],3:[function(require,module,exports){
 /*jshint camelcase: false*/
 
 // A delta is the collection of diffs that represent a transition
@@ -132,7 +141,7 @@ var
 
       return deltas;
     };
-},{"./diff":3,"./googlediff":4,"diff_match_patch":8}],3:[function(require,module,exports){
+},{"./diff":4,"./googlediff":5,"diff_match_patch":9}],4:[function(require,module,exports){
 // A diff represents a single operation/transformation within a delta
 var Diff = module.exports = function (options) {
   this.value      = options.value     || null;
@@ -157,7 +166,7 @@ Diff.prototype.toString = function () {
   // TODO: Compact representation of this diff
   return '';
 };
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var Diff = require('./diff');
 
 var GoogleDiff = module.exports = function (googleDiff) {
@@ -170,13 +179,14 @@ var GoogleDiff = module.exports = function (googleDiff) {
 };
 
 GoogleDiff.prototype = Diff.prototype;
-},{"./diff":3}],5:[function(require,module,exports){
+},{"./diff":4}],6:[function(require,module,exports){
 // Exposes the different types of recorders for instantiation
 module.exports = {
-  CodeMirrorRecorder: require('./codemirrorrecorder'),
-  TextAreaRecorder:   require('./textarearecorder')
+  CodeMirrorRecorder  : require('./codemirrorrecorder'),
+  AceRecorder         : require('./acerecorder'),
+  TextAreaRecorder    : require('./textarearecorder')
 };
-},{"./codemirrorrecorder":1,"./textarearecorder":7}],6:[function(require,module,exports){
+},{"./acerecorder":1,"./codemirrorrecorder":2,"./textarearecorder":8}],7:[function(require,module,exports){
 var Delta = require('./delta');
 
 var Recorder = module.exports = function (target) {
@@ -274,7 +284,7 @@ Recorder.prototype.play = function (target) {
     })(code.join(''), nextFrameAt);
   });
 };
-},{"./delta":2}],7:[function(require,module,exports){
+},{"./delta":3}],8:[function(require,module,exports){
 var Recorder  = require('./recorder');
 
 var TextAreaRecorder = module.exports = function (target) {
@@ -287,7 +297,7 @@ var TextAreaRecorder = module.exports = function (target) {
 };
 
 TextAreaRecorder.prototype = Object.create(Recorder.prototype);
-},{"./recorder":6}],8:[function(require,module,exports){
+},{"./recorder":7}],9:[function(require,module,exports){
 var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
 /**
  * Diff Match and Patch
@@ -2487,6 +2497,6 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
 
 }).call(global, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
 
-},{}]},{},[5])
-(5)
+},{}]},{},[6])
+(6)
 });

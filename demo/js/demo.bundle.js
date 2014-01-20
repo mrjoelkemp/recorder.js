@@ -6376,19 +6376,23 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
 },{}],3:[function(require,module,exports){
 var
     editor    = document.querySelector('.editor'),
-    CodeMirror = require('../../components/amasad-codemirror/codemirror'),
+    CodeMirror = require('../components/amasad-codemirror/codemirror'),
     player    = document.querySelector('.player'),
     recorder;
 
-require('../../components/benatkin-codemirror-mode-javascript/index')(CodeMirror);
+require('../components/benatkin-codemirror-mode-javascript/index')(CodeMirror);
 
 // editor = CodeMirror.fromTextArea(editor);
 // player = CodeMirror.fromTextArea(player);
-editor = new CodeMirror(editor);
-player = new CodeMirror(player);
+// editor = new CodeMirror(editor);
+// player = new CodeMirror(player);
+editor = new window.ace.edit(editor);
+editor.getSession().setMode('ace/mode/javascript');
+player = new window.ace.edit(player);
 
 // recorder = new window.Recorder.TextAreaRecorder(editor);
-recorder = new window.Recorder.CodeMirrorRecorder(editor);
+// recorder = new window.Recorder.CodeMirrorRecorder(editor);
+recorder = new window.Recorder.AceRecorder(editor);
 
 document.querySelector('button.replay').addEventListener('click', function () {
   recorder.play(player);
@@ -6405,4 +6409,4 @@ document.querySelector('button.print').addEventListener('click', function () {
 });
 
 
-},{"../../components/amasad-codemirror/codemirror":1,"../../components/benatkin-codemirror-mode-javascript/index":2}]},{},[3])
+},{"../components/amasad-codemirror/codemirror":1,"../components/benatkin-codemirror-mode-javascript/index":2}]},{},[3])

@@ -1,9 +1,0 @@
-{
-  "name": "recorder.js",
-  "description": "Text recorder for textareas",
-  "dependencies": {
-    "amasad/codemirror": "*"
-  },
-  "development": {},
-  "main": "recorder.js"
-}

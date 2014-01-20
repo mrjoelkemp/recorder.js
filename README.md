@@ -31,6 +31,18 @@ var recorder = new Recorder.CodeMirrorRecorder(editorInstance);
 recorder.play(anotherEditorInstance);
 ```
 
+**[Ace](http://ace.c9.io/)**
+
+```javascript
+
+// editorInstance = ace.edit(yourElement);
+
+var recorder = new Recorder.AceRecorder(editorInstance);
+
+// Playback via another Ace instance or a textarea if you prefer
+recorder.play(anotherEditorInstance);
+```
+
 **Additional commands**
 
 ```javascript
