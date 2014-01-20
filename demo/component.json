@@ -1,0 +1,10 @@
+{
+  "name": "recorder.js",
+  "description": "Text recorder for textareas",
+  "dependencies": {
+    "amasad/codemirror": "*",
+    "benatkin/codemirror-mode-javascript": "*"
+  },
+  "development": {},
+  "main": "recorder.js"
+}

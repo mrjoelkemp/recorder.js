@@ -1,10 +1,10 @@
 var
     editor    = document.querySelector('.editor'),
-    CodeMirror = require('../../components/amasad-codemirror/codemirror'),
+    CodeMirror = require('../components/amasad-codemirror/codemirror'),
     player    = document.querySelector('.player'),
     recorder;
 
-require('../../components/benatkin-codemirror-mode-javascript/index')(CodeMirror);
+require('../components/benatkin-codemirror-mode-javascript/index')(CodeMirror);
 
 // editor = CodeMirror.fromTextArea(editor);
 // player = CodeMirror.fromTextArea(player);
