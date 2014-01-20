@@ -1,14 +1,16 @@
 build: browserify uglify demoify
 
+clean:
+	@echo cleaning
+	@rm -r ./dist/*.js
+
 browserify:
 	@echo browserifying
-	@browserify -s TextAreaRecorder ./src/textarearecorder.js -o ./dist/textarearecorder.js
-	@browserify -s CodeMirrorRecorder ./src/codemirrorrecorder.js -o ./dist/codemirrorrecorder.js
+	@browserify -s Recorder ./src/index.js -o ./dist/recorder.js
 
 uglify:
 	@echo uglifying
-	@uglifyjs ./dist/textarearecorder.js -o ./dist/textarearecorder.min.js
-	@uglifyjs ./dist/codemirrorrecorder.js -o ./dist/codemirrorrecorder.min.js
+	@uglifyjs ./dist/recorder.js -o ./dist/recorder.min.js
 
 demoify:
 	@echo demoifying

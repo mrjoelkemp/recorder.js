@@ -11,8 +11,8 @@ require('../../components/benatkin-codemirror-mode-javascript/index')(CodeMirror
 editor = new CodeMirror(editor);
 player = new CodeMirror(player);
 
-// recorder = new window.TextAreaRecorder(editor);
-recorder = new window.CodeMirrorRecorder(editor);
+// recorder = new window.Recorder.TextAreaRecorder(editor);
+recorder = new window.Recorder.CodeMirrorRecorder(editor);
 
 document.querySelector('button.replay').addEventListener('click', function () {
   recorder.play(player);
