@@ -9,7 +9,7 @@ A textual recorder for textareas and text editors
 
 *Note: All recorder types are accessible via `window.Recorder`.*
 
-**Textarea**
+**HTML Textarea**
 ```javascript
 
 // Set up the recorder to track text changes
@@ -19,7 +19,7 @@ var recorder = new Recorder.TextAreaRecorder(HTMLTextAreaElement);
 recorder.play(HTMLTextAreaElement);
 ```
 
-**[CodeMirror](http://codemirror.net/)**
+**[CodeMirror](http://codemirror.net/) Editor**
 
 ```javascript
 
@@ -31,7 +31,7 @@ var recorder = new Recorder.CodeMirrorRecorder(editorInstance);
 recorder.play(anotherEditorInstance);
 ```
 
-**[Ace](http://ace.c9.io/)**
+**[Ace](http://ace.c9.io/) Editor**
 
 ```javascript
 
