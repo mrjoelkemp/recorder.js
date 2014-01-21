@@ -267,11 +267,11 @@ Recorder.prototype.play = function (target) {
     delta.diffs.forEach(function (diff) {
 
       if (diff.operation === diff.REMOVE) {
+        // Simply empty that element as to avoid
+        // messing up the locations by splicing out the element
         code[diff.location] = '';
-        // code.splice(diff.location, 1, diff.value);
 
       } else if (diff.operation === diff.ADD) {
-        // code[diff.location] = diff.value;
         code.splice(diff.location, 0, diff.value);
       }
     });

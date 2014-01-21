@@ -8,14 +8,14 @@ require('../components/benatkin-codemirror-mode-javascript/index')(CodeMirror);
 
 // editor = CodeMirror.fromTextArea(editor);
 // player = CodeMirror.fromTextArea(player);
-editor = new CodeMirror(editor);
-player = new CodeMirror(player);
+// editor = new CodeMirror(editor);
+// player = new CodeMirror(player);
 // editor = new window.ace.edit(editor);
 // editor.getSession().setMode('ace/mode/javascript');
 // player = new window.ace.edit(player);
 
-// recorder = new window.Recorder.TextAreaRecorder(editor);
-recorder = new window.Recorder.CodeMirrorRecorder(editor);
+recorder = new window.Recorder.TextAreaRecorder(editor);
+// recorder = new window.Recorder.CodeMirrorRecorder(editor);
 // recorder = new window.Recorder.AceRecorder(editor);
 
 document.querySelector('button.replay').addEventListener('click', function () {
