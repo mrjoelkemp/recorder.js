@@ -53,7 +53,7 @@
 
 <div class="highlight highlight-javascript"><pre>
 <span class="c1">// Set up the recorder to track text changes on an element</span>
-<span class="kd">var</span> <span class="nx">recorder</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Recorder</span><span class="p">(</span><span class="nx">HTMLTextAreaElement</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">recorder</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">window.Recorder.TextAreaRecorder</span><span class="p">(</span><span class="nx">HTMLTextAreaElement</span><span class="p">);</span>
 
 <span class="c1">// Play the recording back into the supplied element</span>
 <span class="nx">recorder</span><span class="p">.</span><span class="nx">play</span><span class="p">(</span><span class="nx">HTMLTextAreaElement</span><span class="p">);</span>
