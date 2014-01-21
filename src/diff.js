@@ -18,7 +18,10 @@ Diff.prototype.isNoChange = function () {
   return isEmptyDiff || hasNoChange;
 };
 
+// Returns a compact representation of this diff
+// Note:  It's possible that the value is the same as the delimiter
+//        When parsing, use a regex and not a naive split.
 Diff.prototype.toString = function () {
-  // TODO: Compact representation of this diff
-  return '';
+  var delimiter = ':';
+  return this.operation + delimiter + this.value + delimiter + this.location;
 };
