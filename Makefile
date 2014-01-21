@@ -6,7 +6,7 @@ clean:
 
 browserify:
 	@echo browserifying
-	@browserify -s Recorder ./src/index.js -o ./dist/recorder.js -v
+	@browserify -s Recorder ./src/index.js -o ./dist/recorder.js --list
 
 watchify:
 	@echo watchifying
@@ -18,4 +18,4 @@ uglify:
 
 demoify:
 	@echo demoifying
-	@browserify ./demo/js/demo.js > ./demo/js/demo.bundle.js
+	@browserify ./demo/js/demo.js > ./demo/js/demo.bundle.js --list
