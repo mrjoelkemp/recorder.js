@@ -111,12 +111,21 @@ var
           nextPos += diff.value.length;
 
         } else {
-          // In case the value is multicharacter
-          unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
-          // Extend the list of subdeltas with the unrolled ones
-          diffs = diffs.concat(unrolled);
 
-          nextPos++;
+          // For multi-char deletion, don't unroll into separate diffs
+          if (diff.operation === diff.REMOVE) {
+            diff.location = nextPos;
+            diffs.push(diff);
+            nextPos += diff.value.length;
+
+          } else {
+            // In case the value is multicharacter
+            unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
+            // Extend the list of subdeltas with the unrolled ones
+            diffs = diffs.concat(unrolled);
+            nextPos++;
+          }
+
         }
       });
 
@@ -162,9 +171,12 @@ Diff.prototype.isNoChange = function () {
   return isEmptyDiff || hasNoChange;
 };
 
+// Returns a compact representation of this diff
+// Note:  It's possible that the value is the same as the delimiter
+//        When parsing, use a regex and not a naive split.
 Diff.prototype.toString = function () {
-  // TODO: Compact representation of this diff
-  return '';
+  var delimiter = ':';
+  return this.operation + delimiter + this.value + delimiter + this.location;
 };
 },{}],5:[function(require,module,exports){
 var Diff = require('./diff');
@@ -269,7 +281,7 @@ Recorder.prototype.play = function (target) {
       if (diff.operation === diff.REMOVE) {
         // Simply empty that element as to avoid
         // messing up the locations by splicing out the element
-        code[diff.location] = '';
+        code.splice(diff.location, diff.value.length);
 
       } else if (diff.operation === diff.ADD) {
         code.splice(diff.location, 0, diff.value);

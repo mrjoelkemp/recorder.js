@@ -80,7 +80,7 @@ Recorder.prototype.play = function (target) {
       if (diff.operation === diff.REMOVE) {
         // Simply empty that element as to avoid
         // messing up the locations by splicing out the element
-        code[diff.location] = '';
+        code.splice(diff.location, diff.value.length);
 
       } else if (diff.operation === diff.ADD) {
         code.splice(diff.location, 0, diff.value);

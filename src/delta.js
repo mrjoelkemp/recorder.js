@@ -78,12 +78,21 @@ var
           nextPos += diff.value.length;
 
         } else {
-          // In case the value is multicharacter
-          unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
-          // Extend the list of subdeltas with the unrolled ones
-          diffs = diffs.concat(unrolled);
 
-          nextPos++;
+          // For multi-char deletion, don't unroll into separate diffs
+          if (diff.operation === diff.REMOVE) {
+            diff.location = nextPos;
+            diffs.push(diff);
+            nextPos += diff.value.length;
+
+          } else {
+            // In case the value is multicharacter
+            unrolled = unrollDeltas(diff.value, diff.operation, nextPos);
+            // Extend the list of subdeltas with the unrolled ones
+            diffs = diffs.concat(unrolled);
+            nextPos++;
+          }
+
         }
       });
 
