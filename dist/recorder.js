@@ -268,9 +268,11 @@ Recorder.prototype.play = function (target) {
 
       if (diff.operation === diff.REMOVE) {
         code[diff.location] = '';
+        // code.splice(diff.location, 1, diff.value);
 
       } else if (diff.operation === diff.ADD) {
-        code[diff.location] = diff.value;
+        // code[diff.location] = diff.value;
+        code.splice(diff.location, 0, diff.value);
       }
     });
 
