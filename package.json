@@ -2,7 +2,7 @@
   "name": "recorder.js",
   "version": "0.0.0",
   "description": "Text recorder for textareas",
-  "main": "src/recorder.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
