@@ -1,5 +1,4 @@
-recorder.js
-===
+# recorder.js [![npm](http://img.shields.io/npm/v/recorder.js.svg)](https://npmjs.org/package/recorder.js) [![npm](http://img.shields.io/npm/dm/recorder.js.svg)](https://npmjs.org/package/recorder.js)
 
 A textual recorder for textareas and text editors
 
