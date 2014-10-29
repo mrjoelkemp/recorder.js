@@ -10,7 +10,7 @@ browserify:
 
 watchify:
 	@echo watchifying
-	@watchifying -s Recorder ./src/index.js -o ./dist/recorder.js -v
+	@watchify -s Recorder ./src/index.js -o ./dist/recorder.js -v
 
 uglify:
 	@echo uglifying
