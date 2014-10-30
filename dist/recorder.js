@@ -1,4 +1,4 @@
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Recorder=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/Users/jokemp/Documents/recorder.js/src/acerecorder.js":[function(require,module,exports){
 var CodeMirrorRecorder = require('./codemirrorrecorder');
 
 // Ace's editor has the same event system as CodeMirror
@@ -7,7 +7,7 @@ var AceRecorder = module.exports = function (aceTarget) {
 };
 
 AceRecorder.prototype = Object.create(CodeMirrorRecorder.prototype);
-},{"./codemirrorrecorder":2}],2:[function(require,module,exports){
+},{"./codemirrorrecorder":"/Users/jokemp/Documents/recorder.js/src/codemirrorrecorder.js"}],"/Users/jokemp/Documents/recorder.js/src/codemirrorrecorder.js":[function(require,module,exports){
 var Recorder  = require('./recorder');
 
 var CodeMirrorRecorder = module.exports = function (codeMirrorTarget) {
@@ -30,7 +30,7 @@ CodeMirrorRecorder.prototype = Object.create(Recorder.prototype);
 CodeMirrorRecorder.prototype._getSnapshot = function () {
   return this.target.getValue();
 };
-},{"./recorder":7}],3:[function(require,module,exports){
+},{"./recorder":"/Users/jokemp/Documents/recorder.js/src/recorder.js"}],"/Users/jokemp/Documents/recorder.js/src/delta.js":[function(require,module,exports){
 /*jshint camelcase: false*/
 
 // A delta is the collection of diffs that represent a transition
@@ -150,7 +150,7 @@ var
 
       return deltas;
     };
-},{"./diff":4,"./googlediff":5,"diff_match_patch":9}],4:[function(require,module,exports){
+},{"./diff":"/Users/jokemp/Documents/recorder.js/src/diff.js","./googlediff":"/Users/jokemp/Documents/recorder.js/src/googlediff.js","diff_match_patch":"/Users/jokemp/Documents/recorder.js/vendor/diff_patch/diff_match_patch_uncompressed.js"}],"/Users/jokemp/Documents/recorder.js/src/diff.js":[function(require,module,exports){
 // A diff represents a single operation/transformation within a delta
 var Diff = module.exports = function (options) {
   this.value      = options.value     || null;
@@ -178,7 +178,7 @@ Diff.prototype.toString = function () {
   var delimiter = ':';
   return this.operation + delimiter + this.value + delimiter + this.location;
 };
-},{}],5:[function(require,module,exports){
+},{}],"/Users/jokemp/Documents/recorder.js/src/googlediff.js":[function(require,module,exports){
 var Diff = require('./diff');
 
 var GoogleDiff = module.exports = function (googleDiff) {
@@ -191,16 +191,24 @@ var GoogleDiff = module.exports = function (googleDiff) {
 };
 
 GoogleDiff.prototype = Diff.prototype;
-},{"./diff":4}],6:[function(require,module,exports){
+},{"./diff":"/Users/jokemp/Documents/recorder.js/src/diff.js"}],"/Users/jokemp/Documents/recorder.js/src/index.js":[function(require,module,exports){
 // Exposes the different types of recorders for instantiation
 module.exports = {
   CodeMirrorRecorder  : require('./codemirrorrecorder'),
   AceRecorder         : require('./acerecorder'),
   TextAreaRecorder    : require('./textarearecorder')
 };
-},{"./acerecorder":1,"./codemirrorrecorder":2,"./textarearecorder":8}],7:[function(require,module,exports){
+},{"./acerecorder":"/Users/jokemp/Documents/recorder.js/src/acerecorder.js","./codemirrorrecorder":"/Users/jokemp/Documents/recorder.js/src/codemirrorrecorder.js","./textarearecorder":"/Users/jokemp/Documents/recorder.js/src/textarearecorder.js"}],"/Users/jokemp/Documents/recorder.js/src/recorder.js":[function(require,module,exports){
 var Delta = require('./delta');
 
+/**
+ * Base class for recorders
+ *
+ * @param  {DOM} target - The dom node whose input to record
+ * @module  Recorder
+ * @constructor
+ * @return {Recorder}
+ */
 var Recorder = module.exports = function (target) {
   this.target = target;
 
@@ -213,6 +221,11 @@ var Recorder = module.exports = function (target) {
   return this;
 };
 
+/**
+ * Uses the diffing engine to create a delta between the previous and current snapshots
+ * @private
+ * @param  {String} currentSnapshot
+ */
 Recorder.prototype._computeDelta = function (currentSnapshot) {
   var delta = new Delta({
     time: this._getTimeSinceLastCall()
@@ -231,7 +244,11 @@ Recorder.prototype._computeDelta = function (currentSnapshot) {
   this.lastSnapshot = currentSnapshot;
 };
 
-// Returns the time since the previous call of this function
+/**
+ * Returns the time since the previous call of this function
+ * @private
+ * @return {Number}
+ */
 Recorder.prototype._getTimeSinceLastCall = function () {
   var now = new Date().getTime(),
       // Time delay since last snapshot
@@ -242,36 +259,55 @@ Recorder.prototype._getTimeSinceLastCall = function () {
   return timeSinceLast;
 };
 
-// Defaults to textarea value setting
+/**
+ * Returns the target's value
+ * @private
+ * @return {String}
+ */
 Recorder.prototype._getSnapshot = function () {
   return this.target.value;
 };
 
+/**
+ * Sets the current state of the target
+ * @private
+ * @param {String} text
+ */
 Recorder.prototype._setSnapshot = function (text) {
   this.target.value = text;
 };
 
-// Retrieve the deltas
+/**
+ * Retrieve the deltas
+ * @return {Object} options
+ * @return {Object[]} options.deltas
+ */
 Recorder.prototype.getRecording = function () {
   return {
     deltas: this.deltas
   };
 };
 
-// Deletes all of the deltas
+/**
+ * Deletes all of the deltas
+ */
 Recorder.prototype.clear = function () {
   this.deltas = [];
   this.lastTime = 0;
   this.lastSnapshot = '';
 };
 
-  // Play the recording within the supplied target element
+/**
+ * Play the recording within the supplied target element
+ * @param  {DOM} target
+ * @param  {Number} [speed=1] - The speed of playback. A val of 2 plays twice as fast
+ */
 Recorder.prototype.play = function (target, speed) {
   var nextFrameAt = 0,
       // All deltas will be applied to this state
       code = [];
 
-  speed = typeof speed !== 'undefined' ? speed : 1;
+  speed = speed || 1;
 
   this.deltas.forEach(function (delta) {
     // Stagger the delay to create a sequence
@@ -294,14 +330,19 @@ Recorder.prototype.play = function (target, speed) {
     (function (c, t) {
 
       setTimeout(function () {
-        target.setValue ? target.setValue(c) : (target.value = c);
+        if (target.setValue) {
+          target.setValue(c);
+
+        } else {
+          target.value = c;
+        }
       }, t);
 
     })(code.join(''), nextFrameAt);
   });
 };
 
-},{"./delta":3}],8:[function(require,module,exports){
+},{"./delta":"/Users/jokemp/Documents/recorder.js/src/delta.js"}],"/Users/jokemp/Documents/recorder.js/src/textarearecorder.js":[function(require,module,exports){
 var Recorder  = require('./recorder');
 
 var TextAreaRecorder = module.exports = function (target) {
@@ -314,8 +355,9 @@ var TextAreaRecorder = module.exports = function (target) {
 };
 
 TextAreaRecorder.prototype = Object.create(Recorder.prototype);
-},{"./recorder":7}],9:[function(require,module,exports){
-var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
+},{"./recorder":"/Users/jokemp/Documents/recorder.js/src/recorder.js"}],"/Users/jokemp/Documents/recorder.js/vendor/diff_patch/diff_match_patch_uncompressed.js":[function(require,module,exports){
+(function (global){
+(function browserifyShim(module, exports, define, browserify_shim__define__module__export__) {
 /**
  * Diff Match and Patch
  *
@@ -2514,6 +2556,6 @@ this['DIFF_EQUAL'] = DIFF_EQUAL;
 
 }).call(global, undefined, undefined, undefined, function defineExport(ex) { module.exports = ex; });
 
-},{}]},{},[6])
-(6)
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}]},{},["/Users/jokemp/Documents/recorder.js/src/index.js"])("/Users/jokemp/Documents/recorder.js/src/index.js")
 });
