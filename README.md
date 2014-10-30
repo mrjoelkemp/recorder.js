@@ -53,6 +53,17 @@ recorder.clear()
 recorder.getRecording();
 ```
 
+### Contributing
+
+This lib uses browserify to generate the browser bundle.
+
+To get the environment set up:
+
+1. Fork this repo
+1. Run `npm install` within the root
+1. Run `make` to generate a distribution bundle and update the demo app `demo/`
+1. Run `make watchify` to have watchify rebundle the app while you write code
+
 ### License
 
 MIT
