@@ -6,16 +6,16 @@ clean:
 
 browserify:
 	@echo browserifying
-	@browserify -s Recorder ./src/index.js -o ./dist/recorder.js --list
+	@node node_modules/browserify/bin/cmd.js -s Recorder ./src/index.js -o ./dist/recorder.js --list
 
 watchify:
 	@echo watchifying
-	@watchify -s Recorder ./src/index.js -o ./dist/recorder.js -v
+	@node node_modules/watchify/bin/cmd.js -s Recorder ./src/index.js -o ./dist/recorder.js -v
 
 uglify:
 	@echo uglifying
-	@uglifyjs ./dist/recorder.js -o ./dist/recorder.min.js
+	@node node_modules/uglify-js/bin/uglifyjs ./dist/recorder.js -o ./dist/recorder.min.js
 
 demoify:
 	@echo demoifying
-	@browserify ./demo/js/demo.js > ./demo/js/demo.bundle.js --list
+	@node node_modules/browserify/bin/cmd.js ./demo/js/demo.js > ./demo/js/demo.bundle.js --list
