@@ -14,8 +14,8 @@ A textual recorder for textareas and text editors
 // Set up the recorder to track text changes
 var recorder = new Recorder.TextAreaRecorder(HTMLTextAreaElement);
 
-// Play the recording back into the supplied element
-recorder.play(HTMLTextAreaElement);
+// Play the recording back into the supplied element (using 2x speed)
+recorder.play(HTMLTextAreaElement, 2);
 ```
 
 **[CodeMirror](http://codemirror.net/) Editor**
@@ -26,7 +26,7 @@ recorder.play(HTMLTextAreaElement);
 
 var recorder = new Recorder.CodeMirrorRecorder(editorInstance);
 
-// Playback via another Codemirror instance or a textarea if you prefer
+// Playback via another Codemirror instance or a textarea if you prefer (at 1x speed, by default)
 recorder.play(anotherEditorInstance);
 ```
 
