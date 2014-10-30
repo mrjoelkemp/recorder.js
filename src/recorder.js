@@ -65,14 +65,16 @@ Recorder.prototype.clear = function () {
 };
 
   // Play the recording within the supplied target element
-Recorder.prototype.play = function (target) {
+Recorder.prototype.play = function (target, speed) {
   var nextFrameAt = 0,
       // All deltas will be applied to this state
       code = [];
 
+  speed = typeof speed !== 'undefined' ? speed : 1;
+
   this.deltas.forEach(function (delta) {
     // Stagger the delay to create a sequence
-    nextFrameAt += Number(delta.time);
+    nextFrameAt += (Number(delta.time) / speed);
 
     // Apply all changes of the current delta
     delta.diffs.forEach(function (diff) {
